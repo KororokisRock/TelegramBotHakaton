@@ -1,4 +1,11 @@
 from ProjectClass import bot
+from ..dataBase.func_db import create_db, exists_db
+
+
+def initial_start_work():
+    if not exists_db:
+        create_db()
+    
 
 
 @bot.message_handler(commands=['start'])
