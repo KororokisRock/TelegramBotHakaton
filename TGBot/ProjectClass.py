@@ -13,18 +13,25 @@ class ProjectBot(telebot.TeleBot):
 
 # обёртка меню кнопок под полем для ввода сообщений в наш класс
 class ProjectReplyKeyboard(telebot.types.ReplyKeyboardMarkup):
-    def __init__(self, resize_keyboard, *args):
+    def __init__(self, resize_keyboard, keyboard, row_width=3):
         # запрашиваем будет ли телеграм менять размер кнопок для лучшего визуала
         super().__init__(resize_keyboard)
-        # каждый список в поле args - одна строка с кнопками в меню
-        # ['1', '2', '3'], ['4', '5', '6'] -> |1| |2| |3|
-        #                                     |4| |5| |6|
-        for buttons in args:
-            self.add(*buttons)
+        # задаётся кол-во кнопок в поле и список кнопок
+        for i in range(len(keyboard) // row_width):
+            if i == len(keyboard) // row_width - 1:
+                self.add(*keyboard[i*row_width :])
+            else:
+                self.add(*keyboard[i*row_width : i*row_width+row_width])
+
 
     # чтобы удалить клавиатуру вызываем эту функцию и результат передаём в reply_markup функции send_message
     def delete_keyboard_markup(self):
         return telebot.types.ReplyKeyboardRemove()
+
+
+class ProjectInlineKeyboard(telebot.types.InlineKeyboardMarkup):
+    def __init__(self, keyboard=None, row_width=3):
+        super().__init__(keyboard=keyboard, row_width=row_width)
 
 
 

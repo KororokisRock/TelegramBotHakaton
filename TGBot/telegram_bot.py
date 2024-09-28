@@ -15,7 +15,7 @@ def welcome_func_bot(message):
         bot.register_next_step_handler(message, set_login_func_bot)
     else:
         # если существует, то присылаем ему меню кнопок (каждый список обозначает одну строку)
-        keyboard = ProjectReplyKeyboard(True, ['/my_login', '/my_password'], ['Задать вопрос', 'Список вопросов'])
+        keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', '/my_login', '/my_password', '/start'], row_width=2)
         bot.send_message(message.chat.id, 'Здравствуйте!', reply_markup=keyboard)
 
 
@@ -31,7 +31,7 @@ def set_login_func_bot(message):
 def set_password_func_bot(message):
     user_password = message.text
     print(user_password)
-    keyboard = ProjectReplyKeyboard(True, ['/my_login', '/my_password'], ['Задать вопрос', 'Список вопросов'])
+    keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', '/my_login', '/my_password', '/start'], row_width=2)
     bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
 
 
@@ -44,7 +44,9 @@ def ask_question_func_bot(message):
 # Тут начинается цепочка функций бота для ответа на вопросы
 @bot.message_handler(func=lambda message: message.text == 'Список вопросов')
 def list_question_func_bot(message):
-    pass
+    list_question = [f'{i} - question in  bot lalalalal' for i in range(57)]
+    bot.send_message(message.chat.id, 'Список текущих вопросов:')
+    
 
 
 if __name__ == '__main__':
