@@ -1,22 +1,25 @@
-from ProjectClass import bot
-from ..dataBase.func_db import create_db, exists_db, create_tables_db, user_not_exist
+from ProjectClass import bot, ProjectReplyKeyboard
 
 
-def initial_start_work():
-    if not exists_db():
-        create_db()
-    create_tables_db()
+# python TGBot\telegram_bot.py
+def user_exist():
+    return False
 
 
+# если введена комманда start
 @bot.message_handler(commands=['start'])
 def welcome_func_bot(message):
-    if user_not_exist():
+    if not user_exist():# смотрим существует ли такой пользователь
+        # если не существует, то запрашиваем логин
         bot.send_message(message.chat.id, 'Здравствуйте! Вы не зарегестрированы. Введите логин: ')
         bot.register_next_step_handler(message, set_login_func_bot)
     else:
-        bot.send_message()
+        # если существует, то присылаем ему меню кнопок (каждый список обозначает одну строку)
+        keyboard = ProjectReplyKeyboard(True, ['/my_login', '/my_password'], ['Задать вопрос', 'Список вопросов'])
+        bot.send_message(message.chat.id, 'Здравствуйте!', reply_markup=keyboard)
 
 
+# записываем логин, запрашиваем пароль
 def set_login_func_bot(message):
     user_login = message.text
     print(user_login)
@@ -24,10 +27,24 @@ def set_login_func_bot(message):
     bot.register_next_step_handler(message, set_password_func_bot)
 
 
+# записываем пароль, присылаем меню кнопок (каждый список обозначает одну строку)
 def set_password_func_bot(message):
     user_password = message.text
     print(user_password)
-    bot.send_message(message.chat.id, 'Вы зарегестрированы!')
+    keyboard = ProjectReplyKeyboard(True, ['/my_login', '/my_password'], ['Задать вопрос', 'Список вопросов'])
+    bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
+
+
+# Тут начинается цепочка функций бота для вопросов
+@bot.message_handler(func=lambda message: message.text == 'Задать вопрос')
+def ask_question_func_bot(message):
+    pass
+
+
+# Тут начинается цепочка функций бота для ответа на вопросы
+@bot.message_handler(func=lambda message: message.text == 'Список вопросов')
+def list_question_func_bot(message):
+    pass
 
 
 if __name__ == '__main__':
