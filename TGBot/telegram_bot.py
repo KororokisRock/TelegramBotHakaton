@@ -1,4 +1,7 @@
-from ProjectClass import bot, ProjectReplyKeyboard
+from ProjectClass import bot, ProjectReplyKeyboard, MenuPageListQuestion, QuestionInlineKeyboard
+
+import math
+AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
 
 # python TGBot\telegram_bot.py
