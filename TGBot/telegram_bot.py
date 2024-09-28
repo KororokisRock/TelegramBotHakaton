@@ -3,7 +3,7 @@ from ..dataBase.func_db import create_db, exists_db
 
 
 def initial_start_work():
-    if not exists_db:
+    if not exists_db():
         create_db()
     
 
