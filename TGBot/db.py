@@ -66,7 +66,7 @@ def user_in_db(type,cell):
             else: 
                 return False
 #внесение в бд нового юзера если юзер с таким ником уже есть возвращает False 
-def user_to_db(user,password,tg_id):
+def user_to_db(user,password,tg_id,chat_id):
     if user_in_db('name',user):
         return False
     cnct = conn()
@@ -231,18 +231,32 @@ def get_all_answer():
             cur.execute(command)
             print(cur.fetchall())
 
+def get_all_users():
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            command = f"SELECT * FROM users"
+            cur.execute(command)
+            print(cur.fetchall())
+
 def command_sql():
     cnct = conn()
     if cnct:
         with cnct.cursor() as cur:
-            command = f"DESCRIBE answer"
+            command = f"SELECT * FROM users"
             cur.execute(command)
-            print(cur.fetchall())
+            res = cur.fetchall()
+
+            for el in res:
+                command = f"UPDATE users SET chat_id = {el[1]} WHERE tg_id = {el[1]}"
+                cur.execute(command)
+                cnct.commit()
 
 if __name__ == '__main__':
     # add_new_quest()
-    get_all_answer()
+    # command_sql()
     print(get_object('users', 'tg_id', '1846860836'))
+    print(get_all_users())
     print(get_all_question())
     # =======
     '''cnct = conn()

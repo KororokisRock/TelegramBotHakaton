@@ -10,6 +10,8 @@ AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 # если введена комманда start
 @bot.message_handler(commands=['start'])
 def welcome_func_bot(message):
+    print(message.chat.id)
+    print(message.from_user.id)
     if not user_in_db('tg_id', message.from_user.id):# смотрим существует ли такой пользователь
         # если не существует, то запрашиваем логин
         
@@ -35,7 +37,7 @@ def set_password_func_bot(message):
     user_password = message.text
     user_login = bot.get_state(message.from_user.id)
 
-    user_to_db(user_login,user_password,message.from_user.id)
+    user_to_db(user_login,user_password,message.from_user.id, message.chat.id)
 
     keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start'], row_width=2)
     bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
@@ -119,6 +121,8 @@ def get_answer_from_user_func_bot(message):
     index_quest = bot.get_state(message.from_user.id)
 
     answer_to_db(message.from_user.id, index_quest, message.text)
+
+    bot.send_message()
 
     bot.send_message(message.chat.id, text='Ответ записан. Спасибо!')
 
