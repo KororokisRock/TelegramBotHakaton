@@ -77,6 +77,9 @@ class MenuQuestionKeyboard(ProjectInlineKeyboard):
                    {'text': 'Следующий', 'callback_data': 'next_quest'},
                    {'text': 'Ответить на вопрос', 'callback_data': 'answer_quest'}]
         super().__init__(keyboard=buttons, row_width=row_width)
+    
+    def get_index_quest_by_message_text(message_text):
+        return int(message_text[message_text.index('№') + 1:message_text.index(':')]) - 1
 
 
 

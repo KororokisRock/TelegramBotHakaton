@@ -1,5 +1,5 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard
-from db import user_in_db, user_to_db, get_object, get_all_question
+from db import user_in_db, user_to_db, get_object, get_count_questions
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -49,29 +49,36 @@ def ask_question_func_bot(message):
 
 # Тут начинается цепочка функций бота для ответа на вопросы
 @bot.message_handler(func=lambda message: message.text == 'Список вопросов')
-def list_question_func_bot(message):
+def show_question_func_bot(message):
     keyboard = MenuQuestionKeyboard(row_width=2)
     question = get_object('quest', 'q_id', '0')
-    print(get_all_question())
-    #bot.send_message(chat_id=message.chat.id, text=f'Вопрос №{}:\n{}', reply_markup=keyboard)
+
+    bot.send_message(chat_id=message.chat.id, text=f'Вопрос №{question['q_id'] + 1}:\n{question['q_text']}', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'back_page_list_question')
-def list_question_back_page_func_bot(call):
-    pass
+@bot.callback_query_handler(func=lambda call: call.data == 'prev_quest')
+def go_to_prev_quest_func_bot(call):
+    keyboard = MenuQuestionKeyboard(row_width=2)
+    index_quest = MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text)
+    index_quest -= 1
+
+    if index_quest >= 0:
+        question = get_object('quest', 'q_id', str(index_quest))
+        bot.send_message(chat_id=call.message.chat.id, text=f'Вопрос №{question['q_id'] + 1}:\n{question['q_text']}', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'next_page_list_question')
+@bot.callback_query_handler(func=lambda call: call.data == 'next_quest')
 def list_question_next_page_func_bot(call):
-    pass
+    keyboard = MenuQuestionKeyboard(row_width=2)
+    index_quest = MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text)
+    index_quest += 1
+
+    if index_quest <= get_count_questions() - 1:
+        question = get_object('quest', 'q_id', str(index_quest))
+        bot.send_message(chat_id=call.message.chat.id, text=f'Вопрос №{question['q_id'] + 1}:\n{question['q_text']}', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.endswith('_clicked_element_list_question'))
-def show_question_in_list_question_func_bot(call):
-    pass
-
-
-@bot.callback_query_handler(func=lambda call: call.data == 'back_to_list_question')
+@bot.callback_query_handler(func=lambda call: call.data == 'answer_quest')
 def list_question_func_bot(call):
     pass
 

@@ -107,6 +107,7 @@ def user_rate(name,rate):
             '''
             cur.execute(command)
             cnct.commit()
+
 '''
 шпакргалка по таблицам:
 название          названия колонок
@@ -117,6 +118,7 @@ users(     id,   tg_id,   name, password, is_admin, rating)
 quest(   q_id, user_id, q_text, rating)
 answer(ans_id, user_id,   q_id, ans_text)
 '''
+
 #строки в бд в виде получение словаря
 def get_object(table, column, cell):
     cnct = conn()
@@ -144,7 +146,8 @@ def get_object(table, column, cell):
             cur.execute(command)
             res2 = [i[0] for i in cur.fetchall()]
             return dict(zip(res2,res1))
-# <<<<<<< HEAD:TGBot/db.py
+
+
 def get_all_question():
     cnct = conn()
     if cnct:
@@ -154,6 +157,7 @@ def get_all_question():
             cur.execute(command)
             res = cur.fetchall()
             return res
+
 def get_count_questions():
     cnct = conn()
     if cnct:
@@ -163,6 +167,7 @@ def get_count_questions():
             cur.execute(command)
             res = cur.fetchall()
             return res
+
 def add_new_quest():
     cnct = conn()
     if cnct:
@@ -172,6 +177,7 @@ def add_new_quest():
                 command = f"INSERT INTO quest(q_id, user_id, q_text, rating) VALUE ({i}, {0}, '{q_text}', {0})"
                 cur.execute(command)
                 cnct.commit()
+
 if __name__ == '__main__':
     # add_new_quest()
     print(get_object('users', 'tg_id', '1846860836'))
