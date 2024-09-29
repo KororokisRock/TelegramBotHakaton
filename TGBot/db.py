@@ -25,6 +25,22 @@ def conn():
         print(e)
         return False
 
+def delete_question_and_answer_by_q_id(q_id):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            DELETE FROM answer WHERE q_id = {q_id}
+        '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            cnct.commit()
+        command = f'''
+            DELETE FROM quest WHERE q_id = {q_id}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            cnct.commit()
+
 def get_question_user_by_user_id(user_tg_id):
     cnct = conn()
     if cnct:

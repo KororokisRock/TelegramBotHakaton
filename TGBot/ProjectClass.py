@@ -79,7 +79,7 @@ class MenuQuestionKeyboard(ProjectInlineKeyboard):
         super().__init__(keyboard=buttons, row_width=row_width)
     
     def get_index_quest_by_message_text(message_text):
-        return int(message_text[message_text.index('№') + 1:message_text.index(':')])
+        return int(message_text[message_text.index('№') + 1:message_text.index(':')]) - 1
     
     def delete_keyboard():
         return telebot.types.ReplyKeyboardRemove()
@@ -96,7 +96,8 @@ class ListUserQuestionKeyboard(ProjectInlineKeyboard):
 
 class ShowAnswersOnQuestionKeyboard(ProjectInlineKeyboard):
     def __init__(self, row_width=3):
-        buttons = [{'text': 'Вернуться к списку', 'callback_data': 'back_to_list_user_question'}]
+        buttons = [{'text': 'Вернуться к списку', 'callback_data': 'back_to_list_user_question'},
+                   {'text': 'Удалить вопрос', 'callback_data': 'delete_user_question'}]
         super().__init__(keyboard=buttons, row_width=row_width)
 
 
