@@ -1,5 +1,5 @@
-from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard
-from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id
+from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard
+from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -19,7 +19,7 @@ def welcome_func_bot(message):
         bot.register_next_step_handler(message, set_login_func_bot)
     else:
         # если существует, то присылаем ему меню кнопок (каждый список обозначает одну строку)
-        keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start'], row_width=2)
+        keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг'], row_width=2)
         bot.send_message(message.chat.id, 'Здравствуйте!', reply_markup=keyboard)
 
 
@@ -39,7 +39,7 @@ def set_password_func_bot(message):
 
     user_to_db(user_login,user_password,message.from_user.id, message.chat.id)
 
-    keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start'], row_width=2)
+    keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг'], row_width=2)
     bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
 
 
@@ -68,6 +68,13 @@ def back_to_list_user_question_func_bot(call):
     keyboard = ListUserQuestionKeyboard(list_question=questions, row_width=2)
 
     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Список ваших вопросов:', reply_markup=keyboard)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Мой рейтинг')
+def show_user_rate_func_bot(message):
+    user = get_object('users', 'tg_id', str(message.from_user.id))
+    bot.send_message(chat_id=message.chat.id, text=f'Ваш рейтинг: {user['rating']}')
+
 
 # Тут начинается цепочка функций бота для вопросов
 @bot.message_handler(func=lambda message: message.text == 'Задать вопрос')
@@ -122,9 +129,34 @@ def get_answer_from_user_func_bot(message):
 
     answer_to_db(message.from_user.id, index_quest, message.text)
 
-    bot.send_message()
+    question = get_object('quest', 'q_id', index_quest)
+    user_id_question = question['user_id']
+    user_tg_id_question = get_object('users', 'id', str(user_id_question))['tg_id']
+    chat_id = user_tg_id_question
+    new_text = f'На ваш вопрос пришёл ещё один ответ.\nВопрос:\n{question['q_text']}\nОтвет:\n{message.text}'
+
+    bot.set_state(user_id=int(user_tg_id_question), state=str(message.from_user.id))
+
+    keyboard = SetRateAnswerKeyboard(row_width=2)
+    bot.send_message(chat_id=chat_id, text=new_text, reply_markup=keyboard)
 
     bot.send_message(message.chat.id, text='Ответ записан. Спасибо!')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'add_rate_to_user')
+def add_rate_to_user_func_bot(call):
+    user_id_answer = int(bot.get_state(call.from_user.id))
+    user_rate(user_id_answer, '+')
+    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Спасибо за оценку!')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'remove_rate_to_user')
+def add_rate_to_user_func_bot(call):
+    user_id_answer = int(bot.get_state(call.from_user.id))
+    user_rate(user_id_answer, '-')
+    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Спасибо за оценку!')
 
 
 if __name__ == '__main__':

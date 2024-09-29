@@ -124,13 +124,13 @@ def quest_rate(q_text,rate):
             cur.execute(command)
             cnct.commit()
 #добавляет или убавляет рейтинг юзеру, rate либо '+' либо '-'
-def user_rate(name,rate):
+def user_rate(tg_id,rate):
     cnct = conn()
     if cnct:
         
         with cnct.cursor() as cur:
             command = f'''
-            update users set rating = rating {rate} 1 where name = '{name}'
+            update users set rating = rating {rate} 1 where tg_id = '{tg_id}'
             '''
             cur.execute(command)
             cnct.commit()

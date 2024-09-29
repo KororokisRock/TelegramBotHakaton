@@ -100,6 +100,13 @@ class ShowAnswersOnQuestionKeyboard(ProjectInlineKeyboard):
         super().__init__(keyboard=buttons, row_width=row_width)
 
 
+class SetRateAnswerKeyboard(ProjectInlineKeyboard):
+    def __init__(self, row_width=3):
+        buttons = [{'text': '+', 'callback_data': 'add_rate_to_user'},
+                   {'text': '-', 'callback_data': 'remove_rate_to_user'}]
+        super().__init__(keyboard=buttons, row_width=row_width)
+
+
 class Question:
     def __init__(self, question_id, user_id, text, rate):
         self.question_id = question_id
