@@ -1,6 +1,11 @@
 from django.shortcuts import render
-from django.contrib.auth.models import User
 from django.http import HttpResponse
+
+from . import db
+
+
+
+
 
 # Create your views here.
 def profile(request):
@@ -12,13 +17,19 @@ def profile(request):
     return render(request, 'accounts/profile.html',context)
 
 def reg(request):
+    is_same = False
+    
     if request.method == 'POST':
         req = request.POST
-        if req['pass1']==req['pass2']:
-            User(username = req['user'], password = req['pass1']).save()
+        if req['password']==req['confirm-password']:
+            db.user_to_db(req['username'],req['password'])
             return HttpResponse('регистрация выполнена')
         else:
-            return HttpResponse('пароли не совпадают')
+            is_same = True
+            context={
+                'flag':is_same
+            }
+            return render(request, 'accounts/registr.html',context)
     else:
         return render(request, 'accounts/registr.html')
 
