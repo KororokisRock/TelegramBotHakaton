@@ -24,6 +24,33 @@ def conn():
     except Error as e:
         print(e)
         return False
+
+def get_question_user_by_user_id(user_tg_id):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            SELECT * FROM users WHERE tg_id = {user_tg_id}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            res = cur.fetchall()
+        command = f'''
+            SELECT * FROM quest WHERE user_id = {res[0][0]}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            return cur.fetchall()
+
+def get_all_answer_by_question_id(quest_id):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            SELECT * FROM answer WHERE q_id = {quest_id}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            return cur.fetchall()
+
 #проверка: есть ли юзер в бд
 def user_in_db(type,cell):
     cnct = conn()
@@ -83,7 +110,6 @@ def answer_to_db(tg_id,quest_id, ans_text):
             INSERT INTO answer(user_id,q_id,ans_text)
             VALUE({res[0][0]}, {quest_id}, '{ans_text}')
             '''
-            print(command)
             cur.execute(command)
             cnct.commit()
 #добавляет или убавляет рейтинг вопроса, rate либо '+' либо '-'

@@ -85,6 +85,15 @@ class MenuQuestionKeyboard(ProjectInlineKeyboard):
         return telebot.types.ReplyKeyboardRemove()
 
 
+class ListUserQuestionKeyboard(ProjectInlineKeyboard):
+    def __init__(self, list_question=[], row_width=3):
+        buttons = [{'text': f'{i+1} - {list_question[i][2][:5]}..', 'callback_data': f'{list_question[i][0]}_clicked_item_list_user_question'} for i in range(len(list_question))]
+        super().__init__(keyboard=buttons, row_width=row_width)
+    
+    def get_id_question_by_call_text(call_text):
+        return int(call_text[:call_text.index('_')])
+
+
 class Question:
     def __init__(self, question_id, user_id, text, rate):
         self.question_id = question_id

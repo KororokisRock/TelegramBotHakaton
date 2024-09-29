@@ -1,5 +1,5 @@
-from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard
-from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db
+from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard
+from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -39,6 +39,21 @@ def set_password_func_bot(message):
 
     keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start'], row_width=2)
     bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Список моих вопросов')
+def show_question_user_func_bot(message):
+    questions = get_question_user_by_user_id(message.from_user.id)
+    keyboard = ListUserQuestionKeyboard(list_question=questions, row_width=2)
+
+    bot.send_message(message.chat.id, 'Список ваших вопросов:', reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.endswith('_clicked_item_list_user_question'))
+def show_all_answers_on_user_question(call):
+    id_question = ListUserQuestionKeyboard.get_id_question_by_call_text(call.data)
+    answers = get_all_answer_by_question_id(id_question)
+    
 
 
 # Тут начинается цепочка функций бота для вопросов
