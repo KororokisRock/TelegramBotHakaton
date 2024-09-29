@@ -1,5 +1,5 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuPageListQuestion, QuestionInlineKeyboard
-import db 
+from db import user_in_db, user_to_db
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -10,7 +10,7 @@ AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 # если введена комманда start
 @bot.message_handler(commands=['start'])
 def welcome_func_bot(message):
-    if not db.user_in_db('tg_id', message.from_user.id):# смотрим существует ли такой пользователь
+    if not user_in_db('tg_id', message.from_user.id):# смотрим существует ли такой пользователь
         # если не существует, то запрашиваем логин
         
         bot.send_message(message.chat.id, 'Здравствуйте! Вы не зарегестрированы. Введите логин: ')
@@ -35,7 +35,7 @@ def set_password_func_bot(message):
     user_login = bot.forward_message(message.chat.id, message.chat.id, message.message_id - 2)
     bot.edit_message_text('красавa!', user_login.chat.id, message.message_id - 1)
     
-    db.user_to_db(user_login,user_password,message.from_user.id)
+    user_to_db(user_login,user_password,message.from_user.id)
 
     keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start'], row_width=2)
     bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
