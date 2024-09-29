@@ -29,11 +29,11 @@ def conn():
         print(e)
         return False
 #проверка: есть ли юзер в бд
-def user_in_db(user):
+def user_in_db(type,cell):
     cnct = conn()
     if cnct:
         command = f'''
-            SELECT * FROM users WHERE name = "{user}"
+            SELECT * FROM users WHERE {type} = "{cell}"
             '''
         with cnct.cursor() as cur:
             cur.execute(command)
@@ -45,7 +45,7 @@ def user_in_db(user):
 
 #внесение в бд нового юзера если юзер с таким ником уже есть возвращает False 
 def user_to_db(user,password,tg_id):
-    if user_in_db(user):
+    if user_in_db('name',user):
         return False
     cnct = conn()
     if cnct:
@@ -78,7 +78,7 @@ def quest_to_db(user,quest):
             cnct.commit()
 
 #внесение в бд нового ответа
-def quest_to_db(user,quest):
+def answer_to_db(user,quest):
     cnct = conn()
     if cnct:
         
@@ -150,10 +150,11 @@ def get_object(table, column, cell):
                 SELECT * FROM {table} WHERE {column} = '{cell}'
                 '''
             cur.execute(command)
-            if len(cur.fetchall()) == 0:
+            res  = cur.fetchall()
+            if len(res) == 0:
                 return print('нет такой ячейки')
             
-            res1 = [i for i in cur.fetchall()[0]]
+            res1 = [i for i in res[0]]
 
             command =f'''
                 SELECT COLUMN_NAME 
@@ -165,5 +166,5 @@ def get_object(table, column, cell):
             return dict(zip(res2,res1))
 
 
-
+print(get_object('users', 'name', 'hoho'))
 
