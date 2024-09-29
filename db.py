@@ -166,14 +166,14 @@ def get_object(table, column, cell):
             cur.execute(command)
             res2 = [i[0] for i in cur.fetchall()]
             return dict(zip(res2,res1))
-<<<<<<< HEAD:TGBot/db.py
+# <<<<<<< HEAD:TGBot/db.py
 
 
 print(get_object('users', 'name', 'hoho'))
 
-=======
+# =======
 '''cnct = conn()
 with cnct.cursor() as cur:
     cur.execute('select *  from users;')
     print(cur.fetchall())'''
->>>>>>> 420f31fcb11c024f8af8d26dfe3ae50a0f32c5f4:db.py
+# >>>>>>> 420f31fcb11c024f8af8d26dfe3ae50a0f32c5f4:db.py
