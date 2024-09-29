@@ -69,20 +69,21 @@ def quest_to_db(user,quest):
             cur.execute(command)
             cnct.commit()
 #внесение в бд нового ответа
-def answer_to_db(user,quest):
+def answer_to_db(tg_id,quest_id, ans_text):
     cnct = conn()
     if cnct:
         
         with cnct.cursor() as cur:
             command = f'''
-            SELECT id FROM users WHERE name = '{user}'
+            SELECT id FROM users WHERE tg_id = '{tg_id}'
             '''
             cur.execute(command)
             res = cur.fetchall()
             command = f'''
-            INSERT INTO quest(user_id,q_text)
-            VALUE({res[0][0]},'{quest}')
+            INSERT INTO answer(user_id,q_id,ans_text)
+            VALUE({res[0][0]}, {quest_id}, '{ans_text}')
             '''
+            print(command)
             cur.execute(command)
             cnct.commit()
 #добавляет или убавляет рейтинг вопроса, rate либо '+' либо '-'
@@ -168,18 +169,45 @@ def get_count_questions():
             res = cur.fetchall()
             return res[0][0]
 
+def get_first_quest():
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            command = f'''
+                    SELECT * FROM quest'''
+            cur.execute(command)
+            res = cur.fetchall()
+            return res
+
 def add_new_quest():
     cnct = conn()
     if cnct:
         with cnct.cursor() as cur:
             for i in range(6):
                 q_text = f'Question text - {i}, nkzsjvnlkfzdsvnbjlkzdsbblkjz'
-                command = f"INSERT INTO quest(q_id, user_id, q_text, rating) VALUE ({i}, {0}, '{q_text}', {0})"
+                command = f"INSERT INTO quest(user_id, q_text, rating) VALUE ({0}, '{q_text}', {0})"
                 cur.execute(command)
                 cnct.commit()
 
+def delete_all_quest():
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            command = f"DELETE FROM quest"
+            cur.execute(command)
+            cnct.commit()
+
+def command_sql():
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            command = f"DESCRIBE answer"
+            cur.execute(command)
+            print(cur.fetchall())
+
 if __name__ == '__main__':
     # add_new_quest()
+    command_sql()
     print(get_object('users', 'tg_id', '1846860836'))
     print(get_all_question())
     # =======

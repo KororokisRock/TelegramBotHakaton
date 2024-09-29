@@ -1,5 +1,5 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard
-from db import user_in_db, user_to_db, get_object, get_count_questions
+from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -34,6 +34,7 @@ def set_login_func_bot(message):
 def set_password_func_bot(message):
     user_password = message.text
     user_login = bot.get_state(message.from_user.id)
+    bot.delete_state(message.from_user.id)
 
     user_to_db(user_login,user_password,message.from_user.id)
 
@@ -82,7 +83,24 @@ def list_question_next_page_func_bot(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == 'answer_quest')
 def list_question_func_bot(call):
-    pass
+    print('zsfs')
+    index_quest = str(MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text))
+    bot.delete_state(call.message.from_user.id)
+    bot.set_state(call.message.from_user.id, index_quest)
+
+    
+    bot.send_message(call.message.chat.id, text='Введите ответ на вопрос:')
+    bot.register_next_step_handler(call.message, get_answer_from_user)
+
+
+def get_answer_from_user(message):
+    print(324134)
+    index_quest = bot.get_state(message.from_user.id)
+    print(index_quest)
+
+    answer_to_db(message.from_user.id, index_quest, message.text)
+
+    bot.send_message(message.chat.id, text='Ответ записан. Спасибо!')
 
 
 if __name__ == '__main__':
