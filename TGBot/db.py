@@ -197,6 +197,14 @@ def delete_all_quest():
             cur.execute(command)
             cnct.commit()
 
+def get_all_answer():
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            command = f"SELECT * FROM answer"
+            cur.execute(command)
+            print(cur.fetchall())
+
 def command_sql():
     cnct = conn()
     if cnct:
@@ -207,7 +215,7 @@ def command_sql():
 
 if __name__ == '__main__':
     # add_new_quest()
-    command_sql()
+    get_all_answer()
     print(get_object('users', 'tg_id', '1846860836'))
     print(get_all_question())
     # =======
