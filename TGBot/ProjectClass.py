@@ -1,8 +1,5 @@
 import telebot
-from ..config import TOKEN as t
-
-# берём токен бота
-TOKEN = t
+from ..config import TOKEN
 
 
 # обёртка бота библиотеки telebot в наш класс

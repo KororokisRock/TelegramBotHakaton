@@ -5,8 +5,6 @@ AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
 
 # python TGBot\telegram_bot.py
-def user_exist():
-    return False
 
 
 # если введена комманда start
