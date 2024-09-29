@@ -77,8 +77,10 @@ def user_in_db(type,cell):
             else: 
                 return False
 
-#внесение в бд нового юзера если юзер с таким ником уже есть возвращает False, если у юзера не было tg_id, добавляет 
-def user_to_db(user,password,tg_id=0):
+#внесение в бд нового юзера если юзер с таким ником уже есть возвращает False 
+def user_to_db(user,password,tg_id):
+    if user_in_db('name',user):
+        return False
     cnct = conn()
     
 
@@ -121,7 +123,7 @@ def quest_to_db(user_id,quest):
             cnct.commit()
 
 #внесение в бд нового ответа
-def answer_to_db(user_id,q_id,answer):
+def answer_to_db(user,quest):
     cnct = conn()
     if cnct:
         
@@ -175,8 +177,42 @@ answer(ans_id, user_id,   q_id, ans_text)
 
 '''
 
+#строки в бд в виде получение словаря
+def get_object(table, column, cell):
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            if cell.isnumeric():
+                command = f'''
+                SELECT * FROM {table} WHERE {column} = {cell}
+                '''
+            else:
+                command = f'''
+                SELECT * FROM {table} WHERE {column} = '{cell}'
+                '''
+            cur.execute(command)
+            res  = cur.fetchall()
+            if len(res) == 0:
+                return print('нет такой ячейки')
+            
+            res1 = [i for i in res[0]]
 
+            command =f'''
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = '{table}';
+                '''
+            cur.execute(command)
+            res2 = [i[0] for i in cur.fetchall()]
+            return dict(zip(res2,res1))
+# <<<<<<< HEAD:TGBot/db.py
+
+
+print(get_object('users', 'name', 'hoho'))
+
+# =======
 '''cnct = conn()
 with cnct.cursor() as cur:
     cur.execute('select *  from users;')
     print(cur.fetchall())'''
+# >>>>>>> 420f31fcb11c024f8af8d26dfe3ae50a0f32c5f4:db.py
