@@ -1,7 +1,8 @@
 from mysql.connector import connect, Error
+from config import host,user_name,passw,port
 import uuid
 import hashlib
-from decouple import config
+
 
 #создание и хэширование пароля
 def hash_password(password):    
@@ -17,11 +18,11 @@ def check_password(hashed_password, user_password):
 #подключение к бд, выдаёт False если подключение провалено
 def conn():
     try:
-        connection = connect(host=config('host'), 
-                             user=config('user_name'), 
-                             password=config('pass'), 
-                             database=config('user_name'), 
-                             port=config('port'),
+        connection = connect(host=host, 
+                             user=user_name, 
+                             password=passw, 
+                             database=user_name, 
+                             port=port,
                              charset='utf8',
                              use_unicode = True)
         return connection
@@ -121,7 +122,8 @@ def user_rate(name,rate):
             cur.execute(command)
             cnct.commit()
 
-'''шпакргалка по таблицам:
+'''
+шпакргалка по таблицам:
 
 название          названия колонок
 таблицы                  |
@@ -163,7 +165,7 @@ def get_object(table, column, cell):
             cur.execute(command)
             res2 = [i[0] for i in cur.fetchall()]
             return dict(zip(res2,res1))
-
-
-
-
+'''cnct = conn()
+with cnct.cursor() as cur:
+    cur.execute('select *  from users;')
+    print(cur.fetchall())'''
