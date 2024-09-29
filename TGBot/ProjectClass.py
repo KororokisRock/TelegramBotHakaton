@@ -41,42 +41,55 @@ class ProjectInlineKeyboard(telebot.types.InlineKeyboardMarkup):
                 l.clear()
 
 
-class MenuPageListQuestion(ProjectInlineKeyboard):
-    def __init__(self, list_question=None, row_width=3, current_page=1, ammount_question_in_one_page=20):
-        buttons = [{'text': 'Back', 'callback_data': 'back_page_list_question'},
-               {'text': 'Next', 'callback_data': 'next_page_list_question'}]
-        buttons += [{'text': list_question[i][:7] + '...', 'callback_data': f'{i}_clicked_element_list_question'}
-                for i in range(current_page * ammount_question_in_one_page,
-                               current_page * ammount_question_in_one_page + ammount_question_in_one_page)
-                               if i <= len(list_question) - 1]
-        super().__init__(keyboard=buttons, row_width=row_width)
+# class MenuPageListQuestion(ProjectInlineKeyboard):
+#     def __init__(self, list_question=None, row_width=3, current_page=1, ammount_question_in_one_page=20):
+#         buttons = [{'text': 'Back', 'callback_data': 'back_page_list_question'},
+#                {'text': 'Next', 'callback_data': 'next_page_list_question'}]
+#         buttons += [{'text': list_question[i].text[:7] + '...', 'callback_data': f'{i}_clicked_element_list_question'}
+#                 for i in range(current_page * ammount_question_in_one_page,
+#                                current_page * ammount_question_in_one_page + ammount_question_in_one_page)
+#                                if i <= len(list_question) - 1]
+#         super().__init__(keyboard=buttons, row_width=row_width)
     
-    def give_current_page_by_message_text(message_text=''):
-        return int(message_text[message_text.index('Страница') + 9 : message_text.index('/')]) - 1
+#     def give_current_page_by_message_text(message_text=''):
+#         return int(message_text[message_text.index('Страница') + 9 : message_text.index('/')]) - 1
     
-    def give_index_question(callback_data_text=''):
-        return int(callback_data_text[:callback_data_text.index('_')])
+#     def give_index_question(callback_data_text=''):
+#         return int(callback_data_text[:callback_data_text.index('_')])
     
-    def give_current_page_by_index_question(index_question=0, ammount_question_in_one_page=20):
-        return index_question // ammount_question_in_one_page
+#     def give_current_page_by_index_question(index_question=0, ammount_question_in_one_page=20):
+#         return index_question // ammount_question_in_one_page
 
 
-class QuestionInlineKeyboard(ProjectInlineKeyboard):
+# class QuestionInlineKeyboard(ProjectInlineKeyboard):
+#     def __init__(self, row_width=3):
+#         buttons = [{'text': 'Back to list', 'callback_data': 'back_to_list_question'},
+#                    {'text': '1', 'callback_data': '1'}]
+#         super().__init__(keyboard=buttons, row_width=row_width)
+    
+#     def give_index_question_by_message_text(message_text=''):
+#         return int(message_text[message_text.index('№') + 1:message_text.index(':')]) - 1
+
+
+class MenuQuestionKeyboard(ProjectInlineKeyboard):
     def __init__(self, row_width=3):
-        buttons = [{'text': 'Back to list', 'callback_data': 'back_to_list_question'},
-                   {'text': '1', 'callback_data': '1'}]
+        buttons = [{'text': 'Предыдущий', 'callback_data': 'prev_quest'},
+                   {'text': 'Следующий', 'callback_data': 'next_quest'},
+                   {'text': 'Ответить на вопрос', 'callback_data': 'answer_quest'}]
         super().__init__(keyboard=buttons, row_width=row_width)
-    
-    def give_index_question_by_message_text(message_text=''):
-        return int(message_text[message_text.index('№') + 1:message_text.index(':')]) - 1
+
 
 
 class Question:
-    def __init__(self, text, user_id, rate):
+    def __init__(self, question_id, user_id, text, rate):
+        self.question_id = question_id
         self.text = text
         self.user_id = user_id
         self.rate = rate
 
+
+def remake_tuple_to_question(list_question):
+    return [Question(el[0], el[1], el[2], el[3]) for el in list_question]
 
 
 bot = ProjectBot(TOKEN)
