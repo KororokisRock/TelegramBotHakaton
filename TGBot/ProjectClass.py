@@ -1,5 +1,5 @@
 import telebot
-from ..config import TOKEN as t
+from config import TOKEN as t
 
 # берём токен бота
 TOKEN = t

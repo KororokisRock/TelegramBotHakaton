@@ -1,5 +1,5 @@
 from mysql.connector import connect, Error
-from config import host,user_name,passw,port
+from decouple import config
 import uuid
 import hashlib
 
@@ -18,23 +18,56 @@ def check_password(hashed_password, user_password):
 #подключение к бд, выдаёт False если подключение провалено
 def conn():
     try:
-        connection = connect(host=host, 
-                             user=user_name, 
-                             password=passw, 
-                             database=user_name, 
-                             port=port,
+        connection = connect(host=config('host'), 
+                             user=config('user_name'), 
+                             password=config('pass'), 
+                             database=config('user_name'), 
+                             port=config('port'),
                              charset='utf8',
                              use_unicode = True)
         return connection
     except Error as e:
         print(e)
         return False
+    
+#строки в бд в виде получение словаря
+def get_object(table, column, cell):
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            if cell.isnumeric():
+                command = f'''
+                SELECT * FROM {table} WHERE {column} = {cell}
+                '''
+            else:
+                command = f'''
+                SELECT * FROM {table} WHERE {column} = '{cell}'
+                '''
+            cur.execute(command)
+
+            res = cur.fetchall()
+
+            if len(res) == 0:
+                return False
+            
+            res1 = [i for i in res[0]]
+
+            command =f'''
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = '{table}';
+                '''
+            cur.execute(command)
+            res2 = [i[0] for i in cur.fetchall()]
+            return dict(zip(res2,res1))
+
+
 #проверка: есть ли юзер в бд
-def user_in_db(user):
+def user_in_db(type,cell):
     cnct = conn()
     if cnct:
         command = f'''
-            SELECT * FROM users WHERE name = "{user}"
+            SELECT * FROM users WHERE {type} = "{cell}"
             '''
         with cnct.cursor() as cur:
             cur.execute(command)
@@ -44,67 +77,71 @@ def user_in_db(user):
             else: 
                 return False
 
-#внесение в бд нового юзера если юзер с таким ником уже есть возвращает False 
-def user_to_db(user,password,tg_id):
-    if user_in_db(user):
-        return False
+#внесение в бд нового юзера если юзер с таким ником уже есть возвращает False, если у юзера не было tg_id, добавляет 
+def user_to_db(user,password,tg_id=0):
     cnct = conn()
+    
+
     if cnct:
-        command = f'''
-        INSERT INTO users(tg_id,name,password,is_admin)
-        VALUE({tg_id},'{user}','{hash_password(password)}',false)
-        '''
+        log_user = get_object('users','name',user)
+        if log_user:
+            if log_user['tg_id']==0:
+                command = f'''
+                    UPDATE users SET tg_id={tg_id} WHERE name = {log_user['name']}
+                    '''
+            else:
+                print('такой юзер уже существует')
+                return False
+
+
+        else:
+            command = f'''
+                INSERT INTO users(tg_id,name,password,is_admin)
+                VALUE({tg_id},'{user}','{hash_password(password)}',false)
+                '''
         with cnct.cursor() as cur:
             cur.execute(command)
             cnct.commit()
 
 
+
 #внесение в бд нового вопроса
-def quest_to_db(user,quest):
+def quest_to_db(user_id,quest):
     cnct = conn()
     if cnct:
         
         with cnct.cursor() as cur:
-            command = f'''
-            SELECT id FROM users WHERE name = '{user}'
-            '''
-            cur.execute(command)
-            res = cur.fetchall()
+
 
             command = f'''
             INSERT INTO quest(user_id,q_text)
-            VALUE({res[0][0]},'{quest}')
+            VALUE({user_id},'{quest}')
             '''
             cur.execute(command)
             cnct.commit()
 
 #внесение в бд нового ответа
-def quest_to_db(user,quest):
+def answer_to_db(user_id,q_id,answer):
     cnct = conn()
     if cnct:
         
         with cnct.cursor() as cur:
             command = f'''
-            SELECT id FROM users WHERE name = '{user}'
+            INSERT INTO answer(user_id,q_id,ans_text)
+            VALUE({user_id},{q_id},{answer})'
             '''
             cur.execute(command)
-            res = cur.fetchall()
-
-            command = f'''
-            INSERT INTO quest(user_id,q_text)
-            VALUE({res[0][0]},'{quest}')
-            '''
-            cur.execute(command)
+            
             cnct.commit()
 
 #добавляет или убавляет рейтинг вопроса, rate либо '+' либо '-'
-def quest_rate(q_text,rate):
+def quest_rate(q_id,rate):
     cnct = conn()
     if cnct:
         
         with cnct.cursor() as cur:
             command = f'''
-            update quest set rating = rating {rate} 1 where q_text = '{q_text}'
+            update quest set rating = rating {rate} 1 where q_text = '{q_id}'
             '''
             cur.execute(command)
             cnct.commit()
@@ -138,33 +175,7 @@ answer(ans_id, user_id,   q_id, ans_text)
 
 '''
 
-#строки в бд в виде получение словаря
-def get_object(table, column, cell):
-    cnct = conn()
-    if cnct:
-        with cnct.cursor() as cur:
-            if cell.isnumeric():
-                command = f'''
-                SELECT * FROM {table} WHERE {column} = {cell}
-                '''
-            else:
-                command = f'''
-                SELECT * FROM {table} WHERE {column} = '{cell}'
-                '''
-            cur.execute(command)
-            if len(cur.fetchall()) == 0:
-                return print('нет такой ячейки')
-            
-            res1 = [i for i in cur.fetchall()[0]]
 
-            command =f'''
-                SELECT COLUMN_NAME 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_NAME = '{table}';
-                '''
-            cur.execute(command)
-            res2 = [i[0] for i in cur.fetchall()]
-            return dict(zip(res2,res1))
 '''cnct = conn()
 with cnct.cursor() as cur:
     cur.execute('select *  from users;')

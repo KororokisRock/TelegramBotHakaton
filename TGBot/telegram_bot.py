@@ -1,5 +1,5 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuPageListQuestion, QuestionInlineKeyboard
-
+import db
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
