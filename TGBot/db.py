@@ -166,7 +166,7 @@ def get_count_questions():
                     SELECT COUNT(q_id) FROM quest'''
             cur.execute(command)
             res = cur.fetchall()
-            return res
+            return res[0][0]
 
 def add_new_quest():
     cnct = conn()

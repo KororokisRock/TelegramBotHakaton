@@ -51,9 +51,9 @@ def ask_question_func_bot(message):
 @bot.message_handler(func=lambda message: message.text == 'Список вопросов')
 def show_question_func_bot(message):
     keyboard = MenuQuestionKeyboard(row_width=2)
-    question = get_object('quest', 'q_id', '0')
+    question = get_object('quest', 'q_id', '1')
 
-    bot.send_message(chat_id=message.chat.id, text=f'Вопрос №{question['q_id'] + 1}:\n{question['q_text']}', reply_markup=keyboard)
+    bot.send_message(chat_id=message.chat.id, text=f'Вопрос №{question['q_id']}:\n{question['q_text']}', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'prev_quest')
@@ -62,9 +62,10 @@ def go_to_prev_quest_func_bot(call):
     index_quest = MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text)
     index_quest -= 1
 
-    if index_quest >= 0:
+    if index_quest >= 1:
+        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'...')
         question = get_object('quest', 'q_id', str(index_quest))
-        bot.send_message(chat_id=call.message.chat.id, text=f'Вопрос №{question['q_id'] + 1}:\n{question['q_text']}', reply_markup=keyboard)
+        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'Вопрос №{question['q_id']}:\n{question['q_text']}', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next_quest')
@@ -73,9 +74,10 @@ def list_question_next_page_func_bot(call):
     index_quest = MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text)
     index_quest += 1
 
-    if index_quest <= get_count_questions() - 1:
+    if index_quest <= get_count_questions():
+        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'...')
         question = get_object('quest', 'q_id', str(index_quest))
-        bot.send_message(chat_id=call.message.chat.id, text=f'Вопрос №{question['q_id'] + 1}:\n{question['q_text']}', reply_markup=keyboard)
+        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'Вопрос №{question['q_id']}:\n{question['q_text']}', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'answer_quest')

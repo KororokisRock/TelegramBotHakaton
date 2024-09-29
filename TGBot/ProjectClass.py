@@ -79,8 +79,10 @@ class MenuQuestionKeyboard(ProjectInlineKeyboard):
         super().__init__(keyboard=buttons, row_width=row_width)
     
     def get_index_quest_by_message_text(message_text):
-        return int(message_text[message_text.index('№') + 1:message_text.index(':')]) - 1
-
+        return int(message_text[message_text.index('№') + 1:message_text.index(':')])
+    
+    def delete_keyboard():
+        return telebot.types.ReplyKeyboardRemove()
 
 
 class Question:
