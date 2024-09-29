@@ -1,19 +1,18 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuPageListQuestion, QuestionInlineKeyboard
-import db
+from db import user_in_db, user_to_db
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
 
 # python TGBot\telegram_bot.py
-def user_exist():
-    return False
 
 
 # если введена комманда start
 @bot.message_handler(commands=['start'])
 def welcome_func_bot(message):
-    if not user_exist():# смотрим существует ли такой пользователь
+    if not user_in_db('tg_id', message.from_user.id):# смотрим существует ли такой пользователь
         # если не существует, то запрашиваем логин
+        
         bot.send_message(message.chat.id, 'Здравствуйте! Вы не зарегестрированы. Введите логин: ')
         bot.register_next_step_handler(message, set_login_func_bot)
     else:
@@ -25,7 +24,8 @@ def welcome_func_bot(message):
 # записываем логин, запрашиваем пароль
 def set_login_func_bot(message):
     user_login = message.text
-    print(user_login)
+    bot.set_state(message.from_user.id, user_login)
+
     bot.send_message(message.chat.id, 'А теперь введите пароль:')
     bot.register_next_step_handler(message, set_password_func_bot)
 
@@ -33,7 +33,11 @@ def set_login_func_bot(message):
 # записываем пароль, присылаем меню кнопок (каждый список обозначает одну строку)
 def set_password_func_bot(message):
     user_password = message.text
-    print(user_password)
+
+    user_login = bot.get_state(message.from_user.id)
+
+    user_to_db(user_login,user_password,message.from_user.id)
+
     keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start'], row_width=2)
     bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
 
