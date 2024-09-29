@@ -24,7 +24,8 @@ def welcome_func_bot(message):
 # записываем логин, запрашиваем пароль
 def set_login_func_bot(message):
     user_login = message.text
-    
+    bot.add_data(message.from_user.id, {'user_login': user_login})
+
     bot.send_message(message.chat.id, 'А теперь введите пароль:')
     bot.register_next_step_handler(message, set_password_func_bot)
 
@@ -32,8 +33,7 @@ def set_login_func_bot(message):
 # записываем пароль, присылаем меню кнопок (каждый список обозначает одну строку)
 def set_password_func_bot(message):
     user_password = message.text
-    user_login = bot.forward_message(message.chat.id, message.chat.id, message.message_id - 2)
-    bot.edit_message_text('красавa!', user_login.chat.id, message.message_id - 1)
+    user_login = bot.retrieve_data(message.from_user.id)['user_login']
     
     user_to_db(user_login,user_password,message.from_user.id)
 

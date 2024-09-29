@@ -1,11 +1,12 @@
 import telebot
+import telebot.storage
 from config import TOKEN
 
 
 # обёртка бота библиотеки telebot в наш класс
 class ProjectBot(telebot.TeleBot):
     def __init__(self, token):
-        super().__init__(token)
+        super().__init__(token, state_storage=telebot.storage.StateMemoryStorage())
 
 
 # обёртка меню кнопок под полем для ввода сообщений в наш класс
@@ -69,4 +70,4 @@ class QuestionInlineKeyboard(ProjectInlineKeyboard):
         return int(message_text[message_text.index('№') + 1:message_text.index(':')]) - 1
 
 
-bot = ProjectBot(TOKEN)
+bot = ProjectBot(TOKEN, )
