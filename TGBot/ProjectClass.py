@@ -1,8 +1,8 @@
 import telebot
-from decouple import config
+from ..config import TOKEN as t
 
 # берём токен бота
-TOKEN = config('TOKEN',default='')
+TOKEN = t
 
 
 # обёртка бота библиотеки telebot в наш класс
