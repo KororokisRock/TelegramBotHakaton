@@ -94,6 +94,12 @@ class ListUserQuestionKeyboard(ProjectInlineKeyboard):
         return int(call_text[:call_text.index('_')])
 
 
+class ShowAnswersOnQuestionKeyboard(ProjectInlineKeyboard):
+    def __init__(self, row_width=3):
+        buttons = [{'text': 'Вернуться к списку', 'callback_data': 'back_to_list_user_question'}]
+        super().__init__(keyboard=buttons, row_width=row_width)
+
+
 class Question:
     def __init__(self, question_id, user_id, text, rate):
         self.question_id = question_id

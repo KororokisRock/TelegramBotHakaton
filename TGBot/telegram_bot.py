@@ -1,4 +1,4 @@
-from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard
+from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard
 from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
@@ -50,11 +50,22 @@ def show_question_user_func_bot(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.endswith('_clicked_item_list_user_question'))
-def show_all_answers_on_user_question(call):
+def show_all_answers_on_user_question_func_bot(call):
     id_question = ListUserQuestionKeyboard.get_id_question_by_call_text(call.data)
+    question = get_object(table='quest', column='q_id', cell=f'{id_question}')
     answers = get_all_answer_by_question_id(id_question)
-    
+    new_text = f'Вопрос:\n{question['q_text']}\n\n' + '\n\n'.join([f'Ответ {i+1}:\n{answers[i][3]}' for i in range(len(answers))])
 
+    keyboard = ShowAnswersOnQuestionKeyboard(row_width=1)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=new_text, reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'back_to_list_user_question')
+def back_to_list_user_question_func_bot(call):
+    questions = get_question_user_by_user_id(call.from_user.id)
+    keyboard = ListUserQuestionKeyboard(list_question=questions, row_width=2)
+
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Список ваших вопросов:', reply_markup=keyboard)
 
 # Тут начинается цепочка функций бота для вопросов
 @bot.message_handler(func=lambda message: message.text == 'Задать вопрос')
@@ -101,10 +112,10 @@ def list_question_func_bot(call):
     bot.set_state(call.from_user.id, index_quest)
     
     bot.send_message(call.from_user.id, text='Введите ответ на вопрос:')
-    bot.register_next_step_handler(call.message, get_answer_from_user)
+    bot.register_next_step_handler(call.message, get_answer_from_user_func_bot)
 
 
-def get_answer_from_user(message):
+def get_answer_from_user_func_bot(message):
     index_quest = bot.get_state(message.from_user.id)
 
     answer_to_db(message.from_user.id, index_quest, message.text)
