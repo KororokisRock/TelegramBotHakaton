@@ -79,13 +79,13 @@ def user_to_db(user,password,tg_id,chat_id):
             cur.execute(command)
             cnct.commit()
 #внесение в бд нового вопроса
-def quest_to_db(user,quest):
+def quest_to_db(tg_id,quest):
     cnct = conn()
     if cnct:
         
         with cnct.cursor() as cur:
             command = f'''
-            SELECT id FROM users WHERE name = '{user}'
+            SELECT id FROM users WHERE tg_id = '{tg_id}'
             '''
             cur.execute(command)
             res = cur.fetchall()

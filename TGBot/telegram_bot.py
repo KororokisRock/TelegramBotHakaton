@@ -1,5 +1,5 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard
-from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate
+from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -10,8 +10,6 @@ AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 # если введена комманда start
 @bot.message_handler(commands=['start'])
 def welcome_func_bot(message):
-    print(message.chat.id)
-    print(message.from_user.id)
     if not user_in_db('tg_id', message.from_user.id):# смотрим существует ли такой пользователь
         # если не существует, то запрашиваем логин
         
@@ -79,7 +77,13 @@ def show_user_rate_func_bot(message):
 # Тут начинается цепочка функций бота для вопросов
 @bot.message_handler(func=lambda message: message.text == 'Задать вопрос')
 def ask_question_func_bot(message):
-    pass
+    bot.send_message(chat_id=message.chat.id, text='Введите ваш вопрос:')
+    bot.register_next_step_handler(message=message, callback=set_new_question_func_bot)
+
+
+def set_new_question_func_bot(message):
+    quest_to_db(message.from_user.id, message.text)
+    bot.send_message(chat_id=message.chat.id, text='Вопрос записан!')
 
 
 # Тут начинается цепочка функций бота для ответа на вопросы
