@@ -108,6 +108,22 @@ class SetRateAnswerKeyboard(ProjectInlineKeyboard):
         super().__init__(keyboard=buttons, row_width=row_width)
 
 
+class ListUserAnswerKeyboard(ProjectInlineKeyboard):
+    def __init__(self, list_answer=[], row_width=3):
+        buttons = [{'text': f'{i+1} - {list_answer[i][3][:5]}..', 'callback_data': f'{list_answer[i][0]}_clicked_item_list_user_answer'} for i in range(len(list_answer))]
+        super().__init__(keyboard=buttons, row_width=row_width)
+    
+    def get_id_answer_by_call_text(call_text):
+        return int(call_text[:call_text.index('_')])
+
+
+class ShowAnswerUserKeyboard(ProjectInlineKeyboard):
+    def __init__(self, row_width=3):
+        buttons = [{'text': 'Удалить ответ', 'callback_data': 'delete_user_answer'},
+                   {'text': 'Вернуться к списку', 'callback_data': 'back_to_list_user_answer'}]
+        super().__init__(keyboard=buttons, row_width=row_width)
+
+
 class Question:
     def __init__(self, question_id, user_id, text, rate):
         self.question_id = question_id

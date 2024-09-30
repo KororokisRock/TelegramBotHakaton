@@ -41,6 +41,16 @@ def delete_question_and_answer_by_q_id(q_id):
             cur.execute(command)
             cnct.commit()
 
+def delete_answer_by_ans_id(ans_id):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            DELETE FROM answer WHERE ans_id = {ans_id}
+        '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            cnct.commit()
+
 def get_question_user_by_user_id(user_tg_id):
     cnct = conn()
     if cnct:
@@ -56,6 +66,23 @@ def get_question_user_by_user_id(user_tg_id):
         with cnct.cursor() as cur:
             cur.execute(command)
             return cur.fetchall()
+
+def get_answer_user_by_user_id(user_tg_id):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            SELECT * FROM users WHERE tg_id = {user_tg_id}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            res = cur.fetchall()[0][0]
+        command = f'''
+            SELECT * FROM answer WHERE user_id = {res}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            res = cur.fetchall()
+        return res
 
 def get_all_answer_by_question_id(quest_id):
     cnct = conn()

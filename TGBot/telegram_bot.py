@@ -1,5 +1,5 @@
-from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard
-from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db, get_all_question, delete_question_and_answer_by_q_id
+from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard, ListUserAnswerKeyboard, ShowAnswerUserKeyboard
+from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db, get_all_question, delete_question_and_answer_by_q_id, get_answer_user_by_user_id, delete_answer_by_ans_id
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -17,7 +17,7 @@ def welcome_func_bot(message):
         bot.register_next_step_handler(message, set_login_func_bot)
     else:
         # если существует, то присылаем ему меню кнопок (каждый список обозначает одну строку)
-        keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг'], row_width=2)
+        keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг', 'Список моих ответов'], row_width=2)
         bot.send_message(message.chat.id, 'Здравствуйте!', reply_markup=keyboard)
 
 
@@ -37,8 +37,50 @@ def set_password_func_bot(message):
 
     user_to_db(user_login,user_password,message.from_user.id, message.chat.id)
 
-    keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг'], row_width=2)
+    keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг', 'Список моих ответов'], row_width=2)
     bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
+
+
+@bot.message_handler(func=lambda message: message.text == 'Список моих ответов')
+def show_answers_user_func_bot(message):
+    answers = get_answer_user_by_user_id(message.from_user.id)
+
+    keyboard = ListUserAnswerKeyboard(list_answer=answers, row_width=2)
+    bot.send_message(message.chat.id, 'Список ваших ответов:', reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.endswith('_clicked_item_list_user_answer'))
+def show_answer_user_func_bot(call):
+    id_answer = ListUserAnswerKeyboard.get_id_answer_by_call_text(call.data)
+    print(id_answer)
+    answer = get_object('answer', 'ans_id', str(id_answer))
+    print(answer)
+    question = get_object('quest', 'q_id', str(answer['q_id']))
+    print(question)
+    new_text = f'Вопрос:\n{question['q_text']}\nВаш ответ:\n{answer['ans_text']}'
+
+    bot.set_state(user_id=call.from_user.id, state=str(id_answer))
+
+    keyboard = ShowAnswerUserKeyboard(row_width=1)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=new_text, reply_markup=keyboard) 
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'back_to_list_user_answer')
+def back_to_list_user_answer_func_bot(call):
+    answers = get_answer_user_by_user_id(call.from_user.id)
+
+    keyboard = ListUserAnswerKeyboard(list_answer=answers, row_width=2)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Список ваших ответов:', reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'delete_user_answer')
+def delete_user_question_func_bot(call):
+    answer_id = bot.get_state(user_id=call.from_user.id)
+    delete_answer_by_ans_id(answer_id)
+    answers = get_answer_user_by_user_id(call.from_user.id)
+
+    keyboard = ListUserAnswerKeyboard(list_answer=answers, row_width=2)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Список ваших ответов:', reply_markup=keyboard)
 
 
 @bot.message_handler(func=lambda message: message.text == 'Список моих вопросов')
