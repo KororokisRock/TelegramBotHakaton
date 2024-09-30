@@ -1,4 +1,4 @@
-from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard, ListUserAnswerKeyboard, ShowAnswerUserKeyboard
+from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard, ListUserAnswerKeyboard, ShowAnswerUserKeyboard, MenuQuestionShowKeyboard
 from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db, get_all_question, delete_question_and_answer_by_q_id, get_answer_user_by_user_id, delete_answer_by_ans_id
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
@@ -139,42 +139,67 @@ def set_new_question_func_bot(message):
 
 # Тут начинается цепочка функций бота для ответа на вопросы
 @bot.message_handler(func=lambda message: message.text == 'Список вопросов')
-def show_question_func_bot(message):
-    keyboard = MenuQuestionKeyboard(row_width=2)
-    question = get_all_question()[0]
+def show_questions_func_bot(message):
+    questions = get_all_question()
+    keyboard = MenuQuestionKeyboard(list_question=questions[:AMMOUNT_QUESTION_IN_ONE_PAGE], row_width=2)
 
-    bot.send_message(chat_id=message.chat.id, text=f'Вопрос №1:\n{question[2]}', reply_markup=keyboard)
+    bot.set_state(message.from_user.id, state='1')
+    bot.send_message(chat_id=message.chat.id, text=f'Список вопросов. Страница 1/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'prev_quest')
-def go_to_prev_quest_func_bot(call):
-    keyboard = MenuQuestionKeyboard(row_width=2)
-    index_quest = MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text)
-    index_quest -= 1
+@bot.callback_query_handler(func=lambda call: call.data == 'prev_page_quest')
+def list_question_prev_page_func_bot(call):
+    current_page = int(bot.get_state(call.from_user.id))
+    current_page -= 1
 
-    if index_quest >= 0:
+    if current_page > 0:
+        bot.set_state(call.from_user.id, state=str(current_page))
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text='...')
-        question = get_all_question()[index_quest]
-        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'Вопрос №{index_quest + 1}:\n{question[2]}', reply_markup=keyboard)
+        questions = get_all_question()
+        keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
+                                    row_width=2)
+        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id,
+                              text=f'Список вопросов. Страница {current_page}/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'next_quest')
+@bot.callback_query_handler(func=lambda call: call.data == 'next_page_quest')
 def list_question_next_page_func_bot(call):
-    keyboard = MenuQuestionKeyboard(row_width=2)
-    index_quest = MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text)
-    index_quest += 1
+    current_page = int(bot.get_state(call.from_user.id))
+    current_page += 1
 
-    if index_quest <= get_count_questions() - 1:
+    if current_page <= math.ceil(get_count_questions() / AMMOUNT_QUESTION_IN_ONE_PAGE):
+        bot.set_state(call.from_user.id, state=str(current_page))
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text='...')
-        question = get_all_question()[index_quest]
-        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'Вопрос №{index_quest + 1}:\n{question[2]}', reply_markup=keyboard)
+        questions = get_all_question()
+        keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
+                                    row_width=2)
+        bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id,
+                              text=f'Список вопросов. Страница {current_page}/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'answer_quest')
+@bot.callback_query_handler(func=lambda call: call.data.endswith('_clicked_item_list_question'))
+def show_menu_question_func_bot(call):
+    question_index = MenuQuestionKeyboard.get_index_quest_by_call_text(call.data)
+    question = get_object('quest', 'q_id', str(question_index))
+
+    keyboard = MenuQuestionShowKeyboard(question_index=question_index, row_width=1)
+    bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id,
+                          text=f'Вопрос:\n{question['q_text']}', reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'back_to_list_question')
+def back_to_list_question_func_bot(call):
+    questions = get_all_question()
+    current_page = int(bot.get_state(call.from_user.id))
+    keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
+                                    row_width=2)
+
+    bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'Список вопросов. Страница 1/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.endswith('_answer_quest'))
 def list_question_func_bot(call):
-    index_quest = str(MenuQuestionKeyboard.get_index_quest_by_message_text(call.message.text))
-    bot.set_state(call.from_user.id, index_quest)
-    
+    bot.set_state(call.from_user.id, call.data[:call.data.index('_')])
     bot.send_message(call.from_user.id, text='Введите ответ на вопрос:')
     bot.register_next_step_handler(call.message, get_answer_from_user_func_bot)
 
@@ -182,13 +207,13 @@ def list_question_func_bot(call):
 def get_answer_from_user_func_bot(message):
     index_quest = bot.get_state(message.from_user.id)
 
-    question = get_all_question()[int(index_quest)]
-    answer_to_db(message.from_user.id, question[0], message.text)
+    question = get_object('quest', 'q_id', index_quest)
+    answer_to_db(message.from_user.id, question['q_id'], message.text)
 
-    user_id_question = question[1]
+    user_id_question = question['user_id']
     user_tg_id_question = get_object('users', 'id', str(user_id_question))['tg_id']
     chat_id = user_tg_id_question
-    new_text = f'На ваш вопрос пришёл ещё один ответ.\nВопрос:\n{question[2]}\nОтвет:\n{message.text}'
+    new_text = f'На ваш вопрос пришёл ещё один ответ.\nВопрос:\n{question['q_text']}\nОтвет:\n{message.text}'
     bot.set_state(user_id=int(user_tg_id_question), state=str(message.from_user.id))
 
     keyboard = SetRateAnswerKeyboard(row_width=2)

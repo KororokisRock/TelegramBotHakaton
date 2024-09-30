@@ -72,17 +72,25 @@ class ProjectInlineKeyboard(telebot.types.InlineKeyboardMarkup):
 
 
 class MenuQuestionKeyboard(ProjectInlineKeyboard):
-    def __init__(self, row_width=3):
-        buttons = [{'text': 'Предыдущий', 'callback_data': 'prev_quest'},
-                   {'text': 'Следующий', 'callback_data': 'next_quest'},
-                   {'text': 'Ответить на вопрос', 'callback_data': 'answer_quest'}]
+    def __init__(self, list_question=[], row_width=3):
+        buttons = [{'text': 'Назад', 'callback_data': 'prev_page_quest'},
+                   {'text': 'Вперёд', 'callback_data': 'next_page_quest'}] + [
+                    {'text': f'{i+1} - {list_question[i][2][:5]}..',
+                     'callback_data': f'{list_question[i][0]}_clicked_item_list_question'} for i in range(len(list_question))]
         super().__init__(keyboard=buttons, row_width=row_width)
-    
-    def get_index_quest_by_message_text(message_text):
-        return int(message_text[message_text.index('№') + 1:message_text.index(':')]) - 1
+
+    def get_index_quest_by_call_text(call_text):
+        return int(call_text[:call_text.index('_')])
     
     def delete_keyboard():
         return telebot.types.ReplyKeyboardRemove()
+
+
+class MenuQuestionShowKeyboard(ProjectInlineKeyboard):
+    def __init__(self,question_index=None, row_width=3):
+        buttons = [{'text': 'Ответить на вопрос', 'callback_data': f'{question_index}_answer_quest'},
+                   {'text': 'Вернуться к списку', 'callback_data': 'back_to_list_question'}]
+        super().__init__(keyboard=buttons, row_width=row_width)
 
 
 class ListUserQuestionKeyboard(ProjectInlineKeyboard):
