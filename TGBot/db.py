@@ -228,6 +228,16 @@ def get_all_question():
             res = cur.fetchall()
             return res
 
+def get_all_question_without_question_user(user_id):
+    cnct = conn()
+    if cnct:
+        with cnct.cursor() as cur:
+            command = f'''
+                    SELECT * FROM quest WHERE user_id != {user_id}'''
+            cur.execute(command)
+            res = cur.fetchall()
+            return res
+
 def get_count_questions():
     cnct = conn()
     if cnct:

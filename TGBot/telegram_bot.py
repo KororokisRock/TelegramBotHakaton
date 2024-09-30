@@ -1,5 +1,5 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard, ListUserAnswerKeyboard, ShowAnswerUserKeyboard, MenuQuestionShowKeyboard
-from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db, get_all_question, delete_question_and_answer_by_q_id, get_answer_user_by_user_id, delete_answer_by_ans_id
+from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db, delete_question_and_answer_by_q_id, get_answer_user_by_user_id, delete_answer_by_ans_id, get_all_question_without_question_user
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -140,7 +140,8 @@ def set_new_question_func_bot(message):
 # Тут начинается цепочка функций бота для ответа на вопросы
 @bot.message_handler(func=lambda message: message.text == 'Список вопросов')
 def show_questions_func_bot(message):
-    questions = get_all_question()
+    user_id = get_object('users', 'tg_id', str(message.from_user.id))['id']
+    questions = get_all_question_without_question_user(user_id)
     keyboard = MenuQuestionKeyboard(list_question=questions[:AMMOUNT_QUESTION_IN_ONE_PAGE], row_width=2)
 
     bot.set_state(message.from_user.id, state='1')
@@ -155,7 +156,8 @@ def list_question_prev_page_func_bot(call):
     if current_page > 0:
         bot.set_state(call.from_user.id, state=str(current_page))
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text='...')
-        questions = get_all_question()
+        user_id = get_object('users', 'tg_id', str(call.from_user.id))['id']
+        questions = get_all_question_without_question_user(user_id)
         keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
                                     row_width=2)
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id,
@@ -170,7 +172,8 @@ def list_question_next_page_func_bot(call):
     if current_page <= math.ceil(get_count_questions() / AMMOUNT_QUESTION_IN_ONE_PAGE):
         bot.set_state(call.from_user.id, state=str(current_page))
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text='...')
-        questions = get_all_question()
+        user_id = get_object('users', 'tg_id', str(call.from_user.id))['id']
+        questions = get_all_question_without_question_user(user_id)
         keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
                                     row_width=2)
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id,
@@ -189,7 +192,8 @@ def show_menu_question_func_bot(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == 'back_to_list_question')
 def back_to_list_question_func_bot(call):
-    questions = get_all_question()
+    user_id = get_object('users', 'tg_id', str(call.from_user.id))['id']
+    questions = get_all_question_without_question_user(user_id)
     current_page = int(bot.get_state(call.from_user.id))
     keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
                                     row_width=2)
