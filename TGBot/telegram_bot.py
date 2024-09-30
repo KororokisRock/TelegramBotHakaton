@@ -1,5 +1,5 @@
 from ProjectClass import bot, ProjectReplyKeyboard, MenuQuestionKeyboard, ListUserQuestionKeyboard, ShowAnswersOnQuestionKeyboard, SetRateAnswerKeyboard, ListUserAnswerKeyboard, ShowAnswerUserKeyboard, MenuQuestionShowKeyboard
-from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db, delete_question_and_answer_by_q_id, get_answer_user_by_user_id, delete_answer_by_ans_id, get_all_question_without_question_user
+from db import user_in_db, user_to_db, get_object, get_count_questions, answer_to_db, get_question_user_by_user_id, get_all_answer_by_question_id, user_rate, quest_to_db, delete_question_and_answer_by_q_id, get_answer_user_by_user_id, delete_answer_by_ans_id, get_all_question_without_question_user, is_valid_password
 import math
 AMMOUNT_QUESTION_IN_ONE_PAGE = 20
 
@@ -25,20 +25,24 @@ def welcome_func_bot(message):
 def set_login_func_bot(message):
     user_login = message.text
     bot.set_state(message.from_user.id, user_login)
-
-    bot.send_message(message.chat.id, 'А теперь введите пароль:')
+    bot.send_message(message.chat.id, 'А теперь введите пароль (Должен быть не менее 6 символов, включать цифры и буквы в разных регистрах):')
     bot.register_next_step_handler(message, set_password_func_bot)
 
 
 # записываем пароль, присылаем меню кнопок (каждый список обозначает одну строку)
 def set_password_func_bot(message):
     user_password = message.text
-    user_login = bot.get_state(message.from_user.id)
+    if is_valid_password(message.text):
 
-    user_to_db(user_login,user_password,message.from_user.id, message.chat.id)
+        user_login = bot.get_state(message.from_user.id)
 
-    keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг', 'Список моих ответов'], row_width=2)
-    bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
+        user_to_db(user_login,user_password,message.from_user.id, message.chat.id)
+
+        keyboard = ProjectReplyKeyboard(True, ['Задать вопрос', 'Список вопросов', 'Список моих вопросов', '/start', 'Мой рейтинг', 'Список моих ответов'], row_width=2)
+        bot.send_message(message.chat.id, 'Вы зарегестрированы!', reply_markup=keyboard)
+    else:
+        bot.send_message(message.chat.id, 'Пароль не соответствует требованиям.')
+        bot.register_next_step_handler(message, set_password_func_bot)
 
 
 @bot.message_handler(func=lambda message: message.text == 'Список моих ответов')

@@ -2,6 +2,39 @@ from mysql.connector import connect, Error
 from config import host,user_name,passw,port
 import uuid
 import hashlib
+
+upper_set = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+lower_set = set('abcdefghijklmnopqrstuvwxyz')
+digit_set = set('1234567890')
+
+
+
+#проверка пароля на надежность
+def is_valid_password(password):
+    
+    # Длина строки пароля не менее шести символов.
+    if len(password) < 6:
+        return False
+
+    password_set = set(password)
+
+    # Содержит хотя бы одну букву в верхнем регистре.
+    # Содержит хотя бы одну букву в нижнем регистре.
+    # Содержит хотя бы одну цифру.
+    # Функция is_valid_password должна вернуть True,
+    # если переданный в качестве параметра пароль отвечает требованиям надежности.
+    return \
+        password_set & upper_set and \
+        password_set & lower_set and \
+        password_set & digit_set
+
+
+
+
+
+
+
+
 #создание и хэширование пароля
 def hash_password(password):    
     salt = uuid.uuid4().hex
