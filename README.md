@@ -27,7 +27,7 @@ py TG_bot/telegram_bot.py
 
 
 7) Запустить локальный сервер:
-py web_site/kai_rating/manage.py
+py web_site/kai_rating/manage.py runserver
 
 
 
