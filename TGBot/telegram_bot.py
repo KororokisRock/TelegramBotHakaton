@@ -52,11 +52,8 @@ def show_answers_user_func_bot(message):
 @bot.callback_query_handler(func=lambda call: call.data.endswith('_clicked_item_list_user_answer'))
 def show_answer_user_func_bot(call):
     id_answer = ListUserAnswerKeyboard.get_id_answer_by_call_text(call.data)
-    print(id_answer)
     answer = get_object('answer', 'ans_id', str(id_answer))
-    print(answer)
     question = get_object('quest', 'q_id', str(answer['q_id']))
-    print(question)
     new_text = f'Вопрос:\n{question['q_text']}\nВаш ответ:\n{answer['ans_text']}'
 
     bot.set_state(user_id=call.from_user.id, state=str(id_answer))
@@ -192,13 +189,12 @@ def get_answer_from_user_func_bot(message):
     user_tg_id_question = get_object('users', 'id', str(user_id_question))['tg_id']
     chat_id = user_tg_id_question
     new_text = f'На ваш вопрос пришёл ещё один ответ.\nВопрос:\n{question[2]}\nОтвет:\n{message.text}'
-
     bot.set_state(user_id=int(user_tg_id_question), state=str(message.from_user.id))
 
     keyboard = SetRateAnswerKeyboard(row_width=2)
     bot.send_message(chat_id=chat_id, text=new_text, reply_markup=keyboard)
 
-    bot.send_message(message.chat.id, text='Ответ записан. Спасибо!')
+    bot.send_message(chat_id=message.chat.id, text='Ответ записан. Спасибо!')
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'add_rate_to_user')
