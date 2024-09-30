@@ -7,6 +7,19 @@ upper_set = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 lower_set = set('abcdefghijklmnopqrstuvwxyz')
 digit_set = set('1234567890')
 
+
+
+tables=[
+    (     'id',   'tg_id',   'name', 'password', 'is_admin', 'rating'),
+       ('q_id', 'user_id', 'q_text', 'rating'),
+    ('ans_id', 'user_id',   'q_id', 'ans_text')
+]
+tabl_n=[
+    'users',
+       'quest',
+    'answer'
+]
+
 #проверка пароля на надежность
 def is_valid_password(password):
     
@@ -54,35 +67,46 @@ def conn():
         return False
     
 #строки в бд в виде получение словаря
-def get_object(table, column, cell):
+def all_db():
     cnct = conn()
     if cnct:
-        with cnct.cursor() as cur:
-            if cell.isnumeric():
-                command = f'''
-                SELECT * FROM {table} WHERE {column} = {cell}
-                '''
-            else:
-                command = f'''
-                SELECT * FROM {table} WHERE {column} = '{cell}'
-                '''
-            cur.execute(command)
-
-            res = cur.fetchall()
-
-            if len(res) == 0:
-                return False
             
-            res1 = [i for i in res[0]]
+        with cnct.cursor() as cur:
+            cur.execute('SELECT * FROM users')
+            users = cur.fetchall()
+            cur.execute('SELECT * FROM quest')
+            quest = cur.fetchall()
+            cur.execute('SELECT * FROM answer')
+            answer = cur.fetchall()
+        res = dict()
+        for c,i in enumerate([users,quest,answer]):
+            resi=[]
+            for j in i:
+                resi+=[dict(zip(tables[c],j))]
+            res[tabl_n[c]]=resi
 
-            command =f'''
-                SELECT COLUMN_NAME 
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_NAME = '{table}';
-                '''
+        return res
+def delete(table, column, cell):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            DELETE FROM {table} WHERE {column} = {cell}
+            '''
+        with cnct.cursor() as cur:
             cur.execute(command)
-            res2 = [i[0] for i in cur.fetchall()]
-            return dict(zip(res2,res1))
+            cnct.commit()
+
+
+    
+def get_object(data,table, column, cell):
+    for i in data[table]:
+        if i[column]==cell:
+            return i
+    return False
+
+
+
+
 
 
 #проверка: есть ли юзер в бд
@@ -171,17 +195,71 @@ def quest_rate(q_id,rate):
 
 
 #добавляет или убавляет рейтинг юзеру, rate либо '+' либо '-'
-def user_rate(name,rate):
+def user_rate(id,rate):
     cnct = conn()
     if cnct:
         
         with cnct.cursor() as cur:
             command = f'''
-            update users set rating = rating {rate} 1 where name = '{name}'
+            update users set rating = rating {rate} 1 where id = {id}
+            '''
+            cur.execute(command)
+            cnct.commit()
+def user_adm(id):
+    cnct = conn()
+    if cnct:
+        
+        with cnct.cursor() as cur:
+            command = f'''
+            update users set is_admin = true where id = {id}
             '''
             cur.execute(command)
             cnct.commit()
 
+def count_by_id(table,column,id):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            SELECT * FROM {table} WHERE {column} = {id}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            res = cur.fetchall()
+            return len(res)
+        
+def sort_table(table,column_pos):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            SELECT * FROM {table}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            res = cur.fetchall()
+            res.sort(key=lambda x:x[column_pos])
+            return res
+
+def table_by_id(table,column,id):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            SELECT * FROM {table} WHERE {column} = {id}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            res = cur.fetchall()
+            return res
+
+def table(table):
+    cnct = conn()
+    if cnct:
+        command = f'''
+            SELECT * FROM {table}
+            '''
+        with cnct.cursor() as cur:
+            cur.execute(command)
+            res = cur.fetchall()
+            return res
 '''
 шпакргалка по таблицам:
 
@@ -201,5 +279,8 @@ answer(ans_id, user_id,   q_id, ans_text)
 
 '''cnct = conn()
 with cnct.cursor() as cur:
-    cur.execute('select *  from users;')
-    print(cur.fetchall())'''
+    command = "INSERT INTO answer(user_id,   q_id, ans_text) VALUE (13,5,'ураааараыврарыарвплтиегпрептыоторапнкпакиуонпптткщо цга угпиуркиегург егпеуи цнкп')"
+
+
+    cur.execute(command)
+    cnct.commit()'''

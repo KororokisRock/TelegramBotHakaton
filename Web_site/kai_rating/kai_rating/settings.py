@@ -24,7 +24,7 @@ pymysql.install_as_MySQLdb()
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#+5l78r$%6hesr1(x_!&@b+-)v-i1^c3!gq3)i^2-vk)#pqzoo'
+SECRET_KEY = config('dj_token')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts.apps.AccountsConfig'
+    'accounts.apps.AccountsConfig',
+    'main.apps.MainConfig'
 ]
 
 MIDDLEWARE = [
