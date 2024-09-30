@@ -159,7 +159,7 @@ def list_question_prev_page_func_bot(call):
         user_id = get_object('users', 'tg_id', str(call.from_user.id))['id']
         questions = get_all_question_without_question_user(user_id)
         keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
-                                    row_width=2)
+                                    row_width=2, current_page=current_page)
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id,
                               text=f'Список вопросов. Страница {current_page}/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
 
@@ -175,7 +175,7 @@ def list_question_next_page_func_bot(call):
         user_id = get_object('users', 'tg_id', str(call.from_user.id))['id']
         questions = get_all_question_without_question_user(user_id)
         keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
-                                    row_width=2)
+                                    row_width=2, current_page=current_page)
         bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id,
                               text=f'Список вопросов. Страница {current_page}/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
 
@@ -196,9 +196,9 @@ def back_to_list_question_func_bot(call):
     questions = get_all_question_without_question_user(user_id)
     current_page = int(bot.get_state(call.from_user.id))
     keyboard = MenuQuestionKeyboard(list_question=questions[(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE:(current_page - 1) * AMMOUNT_QUESTION_IN_ONE_PAGE + AMMOUNT_QUESTION_IN_ONE_PAGE],
-                                    row_width=2)
+                                    row_width=2, current_page=current_page)
 
-    bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'Список вопросов. Страница 1/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
+    bot.edit_message_text(message_id=call.message.message_id, chat_id=call.message.chat.id, text=f'Список вопросов. Страница {current_page}/{math.ceil(len(questions) / AMMOUNT_QUESTION_IN_ONE_PAGE)}', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.endswith('_answer_quest'))

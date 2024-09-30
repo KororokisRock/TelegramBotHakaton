@@ -72,10 +72,10 @@ class ProjectInlineKeyboard(telebot.types.InlineKeyboardMarkup):
 
 
 class MenuQuestionKeyboard(ProjectInlineKeyboard):
-    def __init__(self, list_question=[], row_width=3):
+    def __init__(self, list_question=[], current_page=1, row_width=3, ammount_in_page=20):
         buttons = [{'text': 'Назад', 'callback_data': 'prev_page_quest'},
                    {'text': 'Вперёд', 'callback_data': 'next_page_quest'}] + [
-                    {'text': f'{i+1} - {list_question[i][2][:5]}..',
+                    {'text': f'{(current_page - 1) * ammount_in_page + i + 1} - {list_question[i][2][:5]}..',
                      'callback_data': f'{list_question[i][0]}_clicked_item_list_question'} for i in range(len(list_question))]
         super().__init__(keyboard=buttons, row_width=row_width)
 

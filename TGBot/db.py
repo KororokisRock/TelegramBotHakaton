@@ -262,9 +262,9 @@ def add_new_quest():
     cnct = conn()
     if cnct:
         with cnct.cursor() as cur:
-            for i in range(6):
-                q_text = f'Question text - {i}, nkzsjvnlkfzdsvnbjlkzdsbblkjz'
-                command = f"INSERT INTO quest(user_id, q_text, rating) VALUE ({0}, '{q_text}', {0})"
+            for i in range(60):
+                q_text = f'Question text фдфдфдф - {i}, nkzsjvnlkfzdsvnbjlkzdsbblkjz'
+                command = f"INSERT INTO quest(user_id, q_text, rating) VALUE ({1}, '{q_text}', {0})"
                 cur.execute(command)
                 cnct.commit()
 
